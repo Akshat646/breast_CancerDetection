@@ -20,7 +20,7 @@ A comprehensive New Product Development (NPD) tracking system built with Node.js
 - **Node.js** - JavaScript runtime
 - **Express.js** - Web framework
 - **MySQL** - Relational database
-- **mysql2** - MySQL client for Node.js
+- **mysql** - MySQL client for Node.js
 
 ### Frontend
 - **jQuery** - JavaScript library

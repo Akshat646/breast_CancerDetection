@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 require('dotenv').config();
 
-const { testConnection } = require('./config/database');
+const { testConnection, closePool } = require('./config/database');
 const projectRoutes = require('./routes/projects');
 const unitsRoutes = require('./routes/units');
 
@@ -64,11 +64,7 @@ app.use((req, res) => {
 async function startServer() {
     try {
         // Test database connection
-        const dbConnected = await testConnection();
-        if (!dbConnected) {
-            console.error('Failed to connect to database. Please check your configuration.');
-            process.exit(1);
-        }
+        await testConnection();
 
         app.listen(PORT, () => {
             console.log(`🚀 NPD Tracking System server running on port ${PORT}`);
@@ -83,13 +79,15 @@ async function startServer() {
 }
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
     console.log('SIGTERM received, shutting down gracefully...');
+    await closePool();
     process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
     console.log('SIGINT received, shutting down gracefully...');
+    await closePool();
     process.exit(0);
 });
 

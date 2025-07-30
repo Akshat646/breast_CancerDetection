@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const mysql = require('mysql2/promise');
+const mysql = require('mysql');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
@@ -18,8 +18,35 @@ function question(prompt) {
     });
 }
 
+function createConnection(config) {
+    return new Promise((resolve, reject) => {
+        const connection = mysql.createConnection(config);
+        connection.connect((err) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(connection);
+        });
+    });
+}
+
+function executeQuery(connection, sql) {
+    return new Promise((resolve, reject) => {
+        connection.query(sql, (error, results) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+            resolve(results);
+        });
+    });
+}
+
 async function setupDatabase() {
     console.log('🚀 NPD Tracking System Database Setup\n');
+    
+    let connection;
     
     try {
         // Get database credentials from user or use env defaults
@@ -35,10 +62,11 @@ async function setupDatabase() {
             host: dbHost,
             port: parseInt(dbPort),
             user: dbUser,
-            password: dbPassword
+            password: dbPassword,
+            multipleStatements: true
         };
         
-        const connection = await mysql.createConnection(connectionConfig);
+        connection = await createConnection(connectionConfig);
         console.log('✅ MySQL connection successful');
         
         console.log('📊 Creating database and tables...');
@@ -47,20 +75,14 @@ async function setupDatabase() {
         const schemaPath = path.join(__dirname, 'database', 'schema.sql');
         const schema = fs.readFileSync(schemaPath, 'utf8');
         
-        // Split SQL statements and execute them
-        const statements = schema.split(';').filter(stmt => stmt.trim());
-        
-        for (const statement of statements) {
-            if (statement.trim()) {
-                await connection.execute(statement);
-            }
-        }
+        // Execute the entire schema as multiple statements
+        await executeQuery(connection, schema);
         
         console.log('✅ Database schema created successfully');
         
         // Test with the new database
-        await connection.execute('USE npd_tracking');
-        const [tables] = await connection.execute('SHOW TABLES');
+        await executeQuery(connection, 'USE npd_tracking');
+        const tables = await executeQuery(connection, 'SHOW TABLES');
         
         console.log('📋 Created tables:');
         tables.forEach(table => {
@@ -68,10 +90,8 @@ async function setupDatabase() {
         });
         
         // Test sample data
-        const [projects] = await connection.execute('SELECT COUNT(*) as count FROM projects');
+        const projects = await executeQuery(connection, 'SELECT COUNT(*) as count FROM projects');
         console.log(`📝 Sample projects loaded: ${projects[0].count}`);
-        
-        await connection.end();
         
         // Update .env file if needed
         if (!process.env.DB_HOST) {
@@ -105,7 +125,11 @@ JWT_SECRET=your_jwt_secret_here
         console.log('   1. Ensure MySQL is running');
         console.log('   2. Check your credentials');
         console.log('   3. Verify MySQL service is accessible');
+        console.log('   4. Make sure MySQL user has CREATE privileges');
     } finally {
+        if (connection) {
+            connection.end();
+        }
         rl.close();
     }
 }
