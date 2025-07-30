@@ -450,7 +450,12 @@ app.get('/api/projects/search/:term', async (req, res) => {
 
 // Serve static files (HTML, CSS, JS)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'new_req.html'));
+});
+
+// Alternative route for new_req.html
+app.get('/new_req.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'new_req.html'));
 });
 
 // Start server

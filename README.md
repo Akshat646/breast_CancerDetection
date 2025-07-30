@@ -74,6 +74,7 @@ npd-tracking-system/
 ├── server.js             # Express server and API routes
 ├── database.js           # MySQL connection and database setup
 ├── public/
+│   ├── new_req.html      # Main HTML file for NPD Tracking System
 │   └── js/
 │       └── NEW_Req.js    # Frontend JavaScript with MySQL integration
 └── README.md             # This file
