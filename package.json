@@ -1,0 +1,23 @@
+{
+  "name": "npd-tracking-system",
+  "version": "1.0.0",
+  "description": "NPD Tracking System with MySQL database",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql": "^2.18.1",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["npd", "tracking", "mysql", "express"],
+  "author": "",
+  "license": "ISC"
+}
